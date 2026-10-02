@@ -334,6 +334,39 @@
     color:#fff;
   }
 
+  /* ---------- R R F theme (scoped to .theme-rrf only) — monochrome racing look ---------- */
+  .profile-item.theme-rrf{
+    background:
+      radial-gradient(220px circle at var(--mx) var(--my), rgba(255,255,255,0.12), transparent 70%),
+      linear-gradient(155deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015));
+    border:1px solid rgba(220,220,220,0.3);
+  }
+  .profile-item.theme-rrf:hover{
+    border-color:rgba(255,255,255,0.6);
+    box-shadow:0 16px 34px rgba(0,0,0,.6), 0 0 20px rgba(255,255,255,.16);
+  }
+  .profile-item.theme-rrf .avatar{
+    border:1px solid rgba(255,255,255,0.4);
+    filter:grayscale(1) contrast(1.25) brightness(.95);
+  }
+  .profile-item.theme-rrf:hover .avatar,
+  .profile-item.theme-rrf:focus-visible .avatar{
+    border-color:#fff;
+    box-shadow:0 0 14px rgba(255,255,255,.55);
+  }
+  .profile-item.theme-rrf .profile-name{
+    color:#eee;
+    letter-spacing:.06em;
+    text-shadow:0 0 8px rgba(255,255,255,.25);
+  }
+  .profile-item.theme-rrf .chevron{
+    color:#999;
+  }
+  .profile-item.theme-rrf:hover .chevron,
+  .profile-item.theme-rrf:focus-visible .chevron{
+    color:#fff;
+  }
+
   .chevron{
     flex:0 0 auto; font-size:22px; line-height:1;
     color:var(--white-dim);
@@ -472,6 +505,13 @@
       image: "https://raw.githubusercontent.com/uuhjeike/Black-Knight/main/profile%20photo.jpg",
       url: "https://uuhjeike.github.io/Black-Knight/",
       theme: "blackknight"
+    },
+    {
+      id: "rrf",
+      name: "R R F",
+      image: "https://raw.githubusercontent.com/uuhjeike/R-R-F/main/a5116b8d20f400ef8fc75713da7dc527.jpg",
+      url: "https://uuhjeike.github.io/R-R-F/",
+      theme: "rrf"
     }
   ];
 
