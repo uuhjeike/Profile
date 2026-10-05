@@ -346,13 +346,25 @@
     box-shadow:0 16px 34px rgba(0,0,0,.6), 0 0 20px rgba(255,255,255,.16);
   }
   .profile-item.theme-rrf .avatar{
-    border:1px solid rgba(255,255,255,0.4);
+    overflow:visible;
+    background:transparent;
+    border:none;
+  }
+  .profile-item.theme-rrf .avatar img{
+    position:relative; z-index:1;
+    border-radius:50%;
     filter:grayscale(1) contrast(1.25) brightness(.95);
   }
-  .profile-item.theme-rrf:hover .avatar,
-  .profile-item.theme-rrf:focus-visible .avatar{
-    border-color:#fff;
-    box-shadow:0 0 14px rgba(255,255,255,.55);
+  .profile-item.theme-rrf .avatar::before{
+    content:'';
+    position:absolute; inset:-6px; z-index:0;
+    border-radius:50%;
+    background:repeating-conic-gradient(#f2f2f2 0deg 11deg, #000 11deg 13deg, transparent 13deg 20deg);
+    transition:filter .28s ease;
+  }
+  .profile-item.theme-rrf:hover .avatar::before,
+  .profile-item.theme-rrf:focus-visible .avatar::before{
+    filter:drop-shadow(0 0 6px rgba(255,255,255,.6));
   }
   .profile-item.theme-rrf .profile-name{
     color:#eee;
@@ -365,6 +377,41 @@
   .profile-item.theme-rrf:hover .chevron,
   .profile-item.theme-rrf:focus-visible .chevron{
     color:#fff;
+  }
+
+  /* ---------- Zyphorux theme (scoped to .theme-zyphorux only) — cosmic purple/blue/gold crystal ---------- */
+  .profile-item.theme-zyphorux{
+    --zy-violet:#9b6bff;
+    --zy-blue:#5fb8ff;
+    --zy-gold:#e8c27a;
+    background:
+      radial-gradient(220px circle at var(--mx) var(--my), rgba(155,107,255,0.22), transparent 70%),
+      linear-gradient(155deg, rgba(95,184,255,0.06), rgba(232,194,122,0.03));
+    border:1px solid rgba(155,107,255,0.34);
+  }
+  .profile-item.theme-zyphorux:hover{
+    border-color:rgba(155,107,255,0.65);
+    box-shadow:0 16px 34px rgba(0,0,0,.55), 0 0 26px rgba(95,184,255,.22);
+  }
+  .profile-item.theme-zyphorux .avatar{
+    border:1px solid rgba(155,107,255,0.45);
+  }
+  .profile-item.theme-zyphorux:hover .avatar,
+  .profile-item.theme-zyphorux:focus-visible .avatar{
+    border-color:var(--zy-gold);
+    box-shadow:0 0 16px rgba(155,107,255,.6), 0 0 8px rgba(232,194,122,.5);
+  }
+  .profile-item.theme-zyphorux .profile-name{
+    background:linear-gradient(90deg, var(--zy-blue), var(--zy-violet) 55%, var(--zy-gold));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-shadow:0 0 14px rgba(155,107,255,.35);
+  }
+  .profile-item.theme-zyphorux .chevron{
+    color:var(--zy-violet);
+  }
+  .profile-item.theme-zyphorux:hover .chevron,
+  .profile-item.theme-zyphorux:focus-visible .chevron{
+    color:var(--zy-gold);
   }
 
   .chevron{
@@ -512,6 +559,13 @@
       image: "https://raw.githubusercontent.com/uuhjeike/R-R-F/main/a5116b8d20f400ef8fc75713da7dc527.jpg",
       url: "https://uuhjeike.github.io/R-R-F/",
       theme: "rrf"
+    },
+    {
+      id: "zyphorux",
+      name: "Zyphorux",
+      image: "https://raw.githubusercontent.com/uuhjeike/Zyphorux/main/IMG_20261005_204322.png",
+      url: "https://uuhjeike.github.io/Zyphorux/",
+      theme: "zyphorux"
     }
   ];
 
