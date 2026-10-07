@@ -414,6 +414,42 @@
     color:var(--zy-gold);
   }
 
+  /* ---------- Grey Knights theme (scoped to .theme-greyknights only) — silver/gunmetal + gold ---------- */
+  .profile-item.theme-greyknights{
+    --gk-silver:#c8cdd6;
+    --gk-gunmetal:#5a6270;
+    --gk-gold:#cBa45e;
+    background:
+      radial-gradient(220px circle at var(--mx) var(--my), rgba(200,205,214,0.16), transparent 70%),
+      linear-gradient(155deg, rgba(200,205,214,0.05), rgba(203,164,94,0.03));
+    border:1px solid rgba(200,205,214,0.3);
+  }
+  .profile-item.theme-greyknights:hover{
+    border-color:rgba(200,205,214,0.6);
+    box-shadow:0 16px 34px rgba(0,0,0,.55), 0 0 20px rgba(200,205,214,.18);
+  }
+  .profile-item.theme-greyknights .avatar{
+    border:1px solid rgba(200,205,214,0.45);
+    filter:contrast(1.1) saturate(0.85);
+  }
+  .profile-item.theme-greyknights:hover .avatar,
+  .profile-item.theme-greyknights:focus-visible .avatar{
+    border-color:var(--gk-gold);
+    box-shadow:0 0 14px rgba(200,205,214,.5), 0 0 8px rgba(203,164,94,.45);
+  }
+  .profile-item.theme-greyknights .profile-name{
+    color:var(--gk-silver);
+    letter-spacing:.05em;
+    text-shadow:0 0 8px rgba(200,205,214,.35);
+  }
+  .profile-item.theme-greyknights .chevron{
+    color:var(--gk-gunmetal);
+  }
+  .profile-item.theme-greyknights:hover .chevron,
+  .profile-item.theme-greyknights:focus-visible .chevron{
+    color:var(--gk-gold);
+  }
+
   .chevron{
     flex:0 0 auto; font-size:22px; line-height:1;
     color:var(--white-dim);
@@ -566,6 +602,13 @@
       image: "https://raw.githubusercontent.com/uuhjeike/Zyphorux/main/IMG_20261005_204322.png",
       url: "https://uuhjeike.github.io/Zyphorux/",
       theme: "zyphorux"
+    },
+    {
+      id: "grey-knights",
+      name: "Grey Knights",
+      image: "https://raw.githubusercontent.com/uuhjeike/Grey-Knights/main/file_000000005e288230942243b599bb8cd4.png",
+      url: "https://uuhjeike.github.io/Grey-Knights/",
+      theme: "greyknights"
     }
   ];
 
