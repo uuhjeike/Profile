@@ -450,6 +450,40 @@
     color:var(--gk-gold);
   }
 
+  /* ---------- Crimson Singularity theme (scoped to .theme-crimson only) — minimalist red/black eclipse ---------- */
+  .profile-item.theme-crimson{
+    --cs-red:#ff2b2b;
+    --cs-red-dim:#7a1414;
+    background:
+      radial-gradient(220px circle at var(--mx) var(--my), rgba(255,43,43,0.18), transparent 70%),
+      linear-gradient(155deg, rgba(255,255,255,0.03), rgba(0,0,0,0.02));
+    border:1px solid rgba(255,43,43,0.3);
+  }
+  .profile-item.theme-crimson:hover{
+    border-color:rgba(255,43,43,0.65);
+    box-shadow:0 16px 34px rgba(0,0,0,.65), 0 0 26px rgba(255,43,43,.22);
+  }
+  .profile-item.theme-crimson .avatar{
+    border:1px solid rgba(255,43,43,0.4);
+    filter:contrast(1.15) saturate(.9);
+  }
+  .profile-item.theme-crimson:hover .avatar,
+  .profile-item.theme-crimson:focus-visible .avatar{
+    border-color:var(--cs-red);
+    box-shadow:0 0 16px rgba(255,43,43,.7);
+  }
+  .profile-item.theme-crimson .profile-name{
+    color:#f2f2f2;
+    text-shadow:0 0 10px rgba(255,43,43,.5);
+  }
+  .profile-item.theme-crimson .chevron{
+    color:var(--cs-red-dim);
+  }
+  .profile-item.theme-crimson:hover .chevron,
+  .profile-item.theme-crimson:focus-visible .chevron{
+    color:var(--cs-red);
+  }
+
   .chevron{
     flex:0 0 auto; font-size:22px; line-height:1;
     color:var(--white-dim);
@@ -609,6 +643,13 @@
       image: "https://raw.githubusercontent.com/uuhjeike/Grey-Knights/main/file_000000005e288230942243b599bb8cd4.png",
       url: "https://uuhjeike.github.io/Grey-Knights/",
       theme: "greyknights"
+    },
+    {
+      id: "crimson-singularity",
+      name: "Crimson Singularity",
+      image: "https://raw.githubusercontent.com/uuhjeike/Crimson-Singularity/main/IMG_20261010_184609.jpg",
+      url: "https://uuhjeike.github.io/Crimson-Singularity/",
+      theme: "crimson"
     }
   ];
 
