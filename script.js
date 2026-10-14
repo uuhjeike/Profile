@@ -96,6 +96,18 @@
       url: "https://uuhjeike.github.io/Black-Hole/",
       theme: "blackhole",
       videoAvatar: "https://raw.githubusercontent.com/uuhjeike/Black-Hole/main/5591d7a8efe3e0b7661923ecab104dfa.mp4"
+    },
+    {
+      id: "scotty",
+      name: "SCOTTY",
+      image: "https://raw.githubusercontent.com/uuhjeike/SCOTTY/main/20261014_154946.jpg",
+      url: "https://uuhjeike.github.io/SCOTTY/"
+    },
+    {
+      id: "scotty-2",
+      name: "SCOTTY",
+      image: "https://raw.githubusercontent.com/uuhjeike/SCOTTY-2/main/20261014_154946.jpg",
+      url: "https://uuhjeike.github.io/SCOTTY-2/"
     }
   ];
 
@@ -367,11 +379,24 @@
     }
   }
 
+  /* Parallel to the DOM: renderedEls[k] is the <li> for index (lastRange[0] + k). */
+  var renderedEls = [];
+
+  function cleanupItem(li){
+    var vids = li.querySelectorAll('video');
+    for (var i = 0; i < vids.length; i++){
+      if (mediaObserver) mediaObserver.unobserve(vids[i]);
+      vids[i].pause();
+    }
+  }
+
   function renderList(force){
     var total = dataSource.length();
 
     if (total <= 0){
       listEl.innerHTML = '';
+      renderedEls = [];
+      lastRange = [-1, -1];
       listEl.style.paddingTop = '0px';
       listEl.style.paddingBottom = '0px';
       return;
@@ -382,19 +407,46 @@
 
     if (!force && start === lastRange[0] && end === lastRange[1]) return;
 
-    lastRange = [start, end];
+    var noOverlap = force || lastRange[0] === -1 || start > lastRange[1] || end < lastRange[0];
 
-    listEl.style.paddingTop = (start * (ITEM_HEIGHT + ITEM_GAP)) + 'px';
-    listEl.style.paddingBottom = ((total - end - 1) * (ITEM_HEIGHT + ITEM_GAP)) + 'px';
-
-    var frag = document.createDocumentFragment();
-
-    for (var i = start; i <= end; i++){
-      frag.appendChild(buildItem(dataSource.get(i)));
+    if (noOverlap){
+      for (var j = 0; j < renderedEls.length; j++) cleanupItem(renderedEls[j]);
+      listEl.innerHTML = '';
+      renderedEls = [];
+      var frag = document.createDocumentFragment();
+      for (var i = start; i <= end; i++){
+        var li = buildItem(dataSource.get(i));
+        frag.appendChild(li);
+        renderedEls.push(li);
+      }
+      listEl.appendChild(frag);
+    } else {
+      /* Trim items that scrolled out, then grow only the new edge(s). */
+      while (lastRange[0] < start){
+        var trimmedFront = renderedEls.shift();
+        if (trimmedFront){ cleanupItem(trimmedFront); listEl.removeChild(trimmedFront); }
+        lastRange[0]++;
+      }
+      while (lastRange[1] > end){
+        var trimmedBack = renderedEls.pop();
+        if (trimmedBack){ cleanupItem(trimmedBack); listEl.removeChild(trimmedBack); }
+        lastRange[1]--;
+      }
+      for (var fi = lastRange[0] - 1; fi >= start; fi--){
+        var liFront = buildItem(dataSource.get(fi));
+        listEl.insertBefore(liFront, listEl.firstChild);
+        renderedEls.unshift(liFront);
+      }
+      for (var bi = lastRange[1] + 1; bi <= end; bi++){
+        var liBack = buildItem(dataSource.get(bi));
+        listEl.appendChild(liBack);
+        renderedEls.push(liBack);
+      }
     }
 
-    listEl.innerHTML = '';
-    listEl.appendChild(frag);
+    lastRange = [start, end];
+    listEl.style.paddingTop = (start * (ITEM_HEIGHT + ITEM_GAP)) + 'px';
+    listEl.style.paddingBottom = ((total - end - 1) * (ITEM_HEIGHT + ITEM_GAP)) + 'px';
     measureItemHeight();
   }
 
