@@ -1,196 +1,554 @@
-(() => {
-  'use strict';
-  const FILE = 'Profiles.txt';
-  const grid = document.getElementById('profiles');
-  const search = document.getElementById('search');
-  const clearButton = document.getElementById('clear-search');
-  const count = document.getElementById('count');
-  const status = document.getElementById('status');
-  const empty = document.getElementById('empty');
-  const error = document.getElementById('error');
-  const retry = document.getElementById('retry');
-  let profiles = [];
-  let loadVersion = 0;
+(function(){
+  "use strict";
 
-  // Accepts raw.githubusercontent.com, GitHub /blob/ links, ordinary image/video URLs,
-  // and regular website URLs. Only media URLs are normalized as media.
-  function normalizeMediaUrl(input) {
-    const value = input.trim();
-    if (!value) return '';
-    try {
-      const url = new URL(value, window.location.href);
-      if ((url.hostname === 'github.com' || url.hostname === 'www.github.com') && url.pathname.includes('/blob/')) {
-        const parts = url.pathname.split('/').filter(Boolean);
-        const blobIndex = parts.indexOf('blob');
-        if (parts.length >= blobIndex + 3 && blobIndex >= 2) {
-          const owner = parts[0];
-          const repo = parts[1];
-          const branch = parts[blobIndex + 1];
-          const filePath = parts.slice(blobIndex + 2).join('/');
-          return `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${filePath}${url.search}`;
-        }
-      }
-      // Keep other URL types untouched, including non-GitHub hosts and direct media links.
-      return url.href;
-    } catch (_) {
-      return value;
+  /* =========================================================
+     0. DATA SOURCE — the ONLY place profile data is declared.
+     Adding profile #2, #3, ... #N requires nothing more than
+     pushing objects onto this array, or swapping the source
+     entirely via setDataSource(). Nothing below this section
+     ever needs to change to support 1 profile or a trillion.
+     ========================================================= */
+  var profiles = [
+    {
+      id: "alpha",
+      name: "Alpha",
+      image: "https://raw.githubusercontent.com/mdimrankhanalpha/Alpha/main/file_0000000012b081fa9718ddb092393a0e.png",
+      url: "https://mdimrankhanalpha.github.io/Alpha/"
+    },
+    {
+      id: "tde-alpha",
+      name: "TDE Alpha",
+      role: "Diploma Engineer",
+      image: "https://raw.githubusercontent.com/uuhjeike/TDE-Alpha/main/FB_IMG_1789464542803.jpg",
+      url: "https://uuhjeike.github.io/TDE-Alpha/"
+    },
+    {
+      id: "clash-of-clans",
+      name: "Clash of Clans",
+      theme: "coc",
+      image: "https://raw.githubusercontent.com/uuhjeike/Clash-of-Clans/main/profile%20photo.png",
+      url: "https://uuhjeike.github.io/Clash-of-Clans/"
+    },
+    {
+      id: "brave",
+      name: "Brave",
+      image: "https://raw.githubusercontent.com/uuhjeike/Brave/main/profile%20photo.jpg",
+      url: "https://uuhjeike.github.io/Brave/"
+    },
+    {
+      id: "lucian-vale",
+      name: "Lucian Vale",
+      image: "https://raw.githubusercontent.com/uuhjeike/Lucian-Vale/main/profile%20photo.jpg",
+      url: "https://uuhjeike.github.io/Lucian-Vale-2/"
+    },
+    {
+      id: "shadowignis",
+      name: "ShadowIgnis",
+      image: "https://raw.githubusercontent.com/uuhjeike/ShadowIgnis/main/b24825560455f51aad495d5420fd6023.jpg",
+      url: "https://uuhjeike.github.io/ShadowIgnis/"
+    },
+    {
+      id: "gojo-back",
+      name: "Gojo Back",
+      image: "https://raw.githubusercontent.com/uuhjeike/Gojo-Back/main/file_000000006f5482309020dd84155307a5.png",
+      url: "https://uuhjeike.github.io/Gojo-Back/",
+      theme: "gojo",
+      video: "https://raw.githubusercontent.com/uuhjeike/Gojo-Back/main/6efa14de8ffe4c2358cb0ae55dc5785e_720w.mp4"
+    },
+    {
+      id: "black-knight",
+      name: "Black Knight",
+      image: "https://raw.githubusercontent.com/uuhjeike/Black-Knight/main/profile%20photo.jpg",
+      url: "https://uuhjeike.github.io/Black-Knight/",
+      theme: "blackknight"
+    },
+    {
+      id: "rrf",
+      name: "R R F",
+      image: "https://raw.githubusercontent.com/uuhjeike/R-R-F/main/a5116b8d20f400ef8fc75713da7dc527.jpg",
+      url: "https://uuhjeike.github.io/R-R-F/",
+      theme: "rrf"
+    },
+    {
+      id: "zyphorux",
+      name: "Zyphorux",
+      image: "https://raw.githubusercontent.com/uuhjeike/Zyphorux/main/IMG_20261005_204322.png",
+      url: "https://uuhjeike.github.io/Zyphorux/",
+      theme: "zyphorux"
+    },
+    {
+      id: "grey-knights",
+      name: "Grey Knights",
+      image: "https://raw.githubusercontent.com/uuhjeike/Grey-Knights/main/file_000000005e288230942243b599bb8cd4.png",
+      url: "https://uuhjeike.github.io/Grey-Knights/",
+      theme: "greyknights"
+    },
+    {
+      id: "crimson-singularity",
+      name: "Crimson Singularity",
+      image: "https://raw.githubusercontent.com/uuhjeike/Crimson-Singularity/main/IMG_20261010_184609.jpg",
+      url: "https://uuhjeike.github.io/Crimson-Singularity/",
+      theme: "crimson"
+    },
+    {
+      id: "black-hole",
+      name: "Black Hole",
+      url: "https://uuhjeike.github.io/Black-Hole/",
+      theme: "blackhole",
+      videoAvatar: "https://raw.githubusercontent.com/uuhjeike/Black-Hole/main/5591d7a8efe3e0b7661923ecab104dfa.mp4"
+    },
+    {
+      id: "scotty",
+      name: "SCOTTY",
+      image: "https://raw.githubusercontent.com/uuhjeike/SCOTTY/main/20261014_154946.jpg",
+      url: "https://uuhjeike.github.io/SCOTTY/"
+    },
+    {
+      id: "scotty-2",
+      name: "SCOTTY",
+      image: "https://raw.githubusercontent.com/uuhjeike/SCOTTY-2/main/20261014_154946.jpg",
+      url: "https://uuhjeike.github.io/SCOTTY-2/"
     }
+  ];
+
+  var dataSource = {
+    length: function(){ return profiles.length; },
+    get: function(i){ return profiles[i]; }
+  };
+
+  function setDataSource(src){
+    dataSource = src;
+    lastRange = [-1,-1];
+    renderList(true);
+  }
+  window.setDataSource = setDataSource; // exposed for future paginated/streamed sources
+
+  /* =========================================================
+     1. CONFIG — single source of truth for all timing/tiers
+     ========================================================= */
+  var CONFIG = {
+    loopDuration: 46,
+    timeline: {
+      voidPhase:      [0, 5],
+      formation:      [5, 12],
+      approach:       [12, 27],
+      megaHold:       [27, 30],
+      blackHoleBirth: [30, 33],
+      consumption:    [33, 40],
+      collapse:       [40, 43],
+      destruction:    [43, 44],
+      darkness:       [44, 46]
+    },
+    buffer: 8
+  };
+
+  var PERF_TIERS = {
+    HIGH:   { galaxyStars: 7000, galaxyDust: 2600, galaxyDustLane: 1600, starfield: 3000, debris: 1200, dpr: 2 },
+    MEDIUM: { galaxyStars: 3400, galaxyDust: 1300, galaxyDustLane: 800,  starfield: 1500, debris: 600, dpr: 1.5 },
+    LOW:    { galaxyStars: 1300, galaxyDust: 500,  galaxyDustLane: 320,  starfield: 600, debris: 250, dpr: 1 }
+  };
+
+  function detectTier(){
+    var mem = navigator.deviceMemory || 4;
+    var cores = navigator.hardwareConcurrency || 4;
+    var w = window.innerWidth;
+    if (mem <= 2 || cores <= 2 || w < 480) return 'LOW';
+    if (mem <= 4 || cores <= 4 || w < 900) return 'MEDIUM';
+    return 'HIGH';
   }
 
-  function isVideoUrl(value) {
-    try {
-      const pathname = new URL(value, window.location.href).pathname.toLowerCase();
-      return /\.(mp4|webm|ogg|mov|m4v)$/.test(pathname);
-    } catch (_) {
-      return /\.(mp4|webm|ogg|mov|m4v)(?:[?#].*)?$/i.test(value);
+  var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* =========================================================
+     1b. BACKGROUND VIDEO — reveal once it can play smoothly so
+     there's no flash of a black/blank frame; a timeout
+     guarantees it still shows even on a slow connection.
+     ========================================================= */
+  (function(){
+    var bgVideo = document.getElementById('bg-video');
+    if (!bgVideo) return;
+    var revealed = false;
+    function reveal(){
+      if (revealed) return;
+      revealed = true;
+      bgVideo.classList.add('loaded');
     }
-  }
-
-  function parseProfiles(raw) {
-    // Each record: separator line, name, media URL, profile URL. Blank lines are ignored.
-    // A separator must be a line containing only a dollar sign; a UTF-8 BOM is tolerated.
-    const lines = raw.replace(/^\uFEFF/, '').split(/\r?\n/).map(line => line.trim());
-    const records = [];
-    let block = [];
-    const flush = () => {
-      const values = block.filter(Boolean);
-      if (values.length >= 3) {
-        records.push({ name: values[0], media: values[1], href: values[2] });
-      }
-      block = [];
-    };
-    for (const line of lines) {
-      if (line === '$') {
-        flush();
-      } else if (line) {
-        block.push(line);
-      }
-    }
-    flush();
-    // Deduplicate only exact repeated triples, preserving order and legitimate same-name profiles.
-    const seen = new Set();
-    return records.filter(item => {
-      const key = `${item.name}\n${item.media}\n${item.href}`;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-  }
-
-  function safeProfileHref(value) {
-    try {
-      const url = new URL(value, window.location.href);
-      if (url.protocol === 'https:' || url.protocol === 'http:') return url.href;
-    } catch (_) {}
-    return '#';
-  }
-
-  function createCard(profile, index) {
-    const link = document.createElement('a');
-    link.className = 'profile-card';
-    link.href = safeProfileHref(profile.href);
-    link.target = '_blank';
-    link.rel = 'noopener noreferrer';
-    link.setAttribute('aria-label', `Open ${profile.name} profile in a new tab`);
-
-    const mediaUrl = normalizeMediaUrl(profile.media);
-    let media;
-    if (mediaUrl && isVideoUrl(mediaUrl)) {
-      media = document.createElement('video');
-      media.className = 'avatar';
-      media.src = mediaUrl;
-      media.autoplay = true;
-      media.muted = true;
-      media.loop = true;
-      media.playsInline = true;
-      media.preload = 'metadata';
-      media.setAttribute('aria-label', `${profile.name} profile video`);
-      media.addEventListener('error', () => replaceWithFallback(media, profile.name), { once: true });
+    if (bgVideo.readyState >= 3){
+      reveal();
     } else {
-      media = document.createElement('img');
-      media.className = 'avatar';
-      media.src = mediaUrl;
-      media.alt = `${profile.name} profile image`;
-      media.loading = index < 8 ? 'eager' : 'lazy';
-      media.decoding = 'async';
-      media.referrerPolicy = 'no-referrer';
-      media.addEventListener('error', () => replaceWithFallback(media, profile.name), { once: true });
+      bgVideo.addEventListener('canplay', reveal);
+      bgVideo.addEventListener('loadeddata', reveal);
+      bgVideo.addEventListener('error', reveal);
     }
+    setTimeout(reveal, 3000);
+    var playPromise = bgVideo.play();
+    if (playPromise && typeof playPromise.catch === 'function'){
+      playPromise.catch(function(){});
+    }
+  })();
 
-    const copy = document.createElement('div');
-    copy.className = 'profile-copy';
-    const title = document.createElement('h2');
-    title.className = 'profile-name';
-    title.textContent = profile.name;
-    const label = document.createElement('p');
-    label.className = 'profile-label';
-    label.textContent = 'Open profile ↗';
-    copy.append(title, label);
-    const arrow = document.createElement('span');
-    arrow.className = 'arrow';
-    arrow.setAttribute('aria-hidden', 'true');
-    arrow.textContent = '↗';
-    link.append(media, copy, arrow);
-    return link;
+  /* =========================================================
+     2. MATH HELPERS
+     ========================================================= */
+  function clamp01(x){ return Math.min(1, Math.max(0, x)); }
+  function lerp(a,b,t){ return a + (b - a) * t; }
+  function smoothstep(e0, e1, x){
+    var t = clamp01((x - e0) / (e1 - e0));
+    return t * t * (3 - 2 * t);
   }
 
-  function replaceWithFallback(media, name) {
-    if (!media || !media.parentNode) return;
-    const fallback = document.createElement('div');
-    fallback.className = 'avatar avatar-fallback';
-    fallback.setAttribute('aria-label', `No media available for ${name}`);
-    fallback.textContent = (name.trim()[0] || '?').toUpperCase();
-    media.replaceWith(fallback);
+  /* =========================================================
+     3. EMBLEM — single template, cloned everywhere
+     ========================================================= */
+  function mountEmblem(container){
+    var tpl = document.getElementById('emblem-template');
+    container.appendChild(tpl.content.cloneNode(true));
   }
 
-  function render() {
-    const query = search.value.trim().toLocaleLowerCase();
-    const visible = profiles.filter(profile => profile.name.toLocaleLowerCase().includes(query));
-    const fragment = document.createDocumentFragment();
-    visible.forEach((profile, index) => fragment.appendChild(createCard(profile, index)));
-    grid.replaceChildren(fragment);
-    count.textContent = `${profiles.length} profile${profiles.length === 1 ? '' : 's'}`;
-    status.textContent = query ? `${visible.length} match${visible.length === 1 ? '' : 'es'}` : 'Select a profile to visit its page';
-    empty.hidden = visible.length !== 0;
-    grid.hidden = visible.length === 0;
-    clearButton.hidden = search.value.length === 0;
+  /* =========================================================
+     4. PROFILE LIST — virtualized rendering
+     ========================================================= */
+  var listEl = document.getElementById('profile-list');
+  var currentIndex = 0;
+  var lastRange = [-1, -1];
+  var ITEM_HEIGHT = 98;
+  var ITEM_GAP = 14;
+
+  function buildAvatar(profile){
+    var wrap = document.createElement('span');
+    wrap.className = 'avatar';
+    if (profile.videoAvatar){
+      var video = document.createElement('video');
+      video.className = 'avatar-video';
+      video.dataset.src = profile.videoAvatar;
+      video.muted = true;
+      video.defaultMuted = true;
+      video.loop = true;
+      video.autoplay = true;
+      video.playsInline = true;
+      video.setAttribute('muted', '');
+      video.setAttribute('playsinline', '');
+      video.setAttribute('aria-hidden', 'true');
+      video.preload = 'none';
+      video.addEventListener('error', function(){
+        video.remove();
+        if (!wrap.querySelector('img, .emblem-svg')) mountEmblem(wrap);
+      }, {once:true});
+      wrap.appendChild(video);
+      observeLazyVideo(video);
+    } else if (profile.image && profile.image !== 'emblem'){
+      var img = document.createElement('img');
+      img.src = profile.image;
+      img.alt = '';
+      img.loading = 'lazy';
+      img.decoding = 'async';
+      img.onerror = function(){
+        wrap.innerHTML = '';
+        mountEmblem(wrap);
+        img.onerror = null;
+      };
+      wrap.appendChild(img);
+    } else {
+      mountEmblem(wrap);
+    }
+    return wrap;
   }
 
-  async function loadProfiles() {
-    const version = ++loadVersion;
-    error.hidden = true;
-    empty.hidden = true;
-    grid.hidden = true;
-    status.textContent = 'Loading profile list…';
-    try {
-      const response = await fetch(`${FILE}?v=${Date.now()}`, { cache: 'no-store' });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const raw = await response.text();
-      if (version !== loadVersion) return;
-      profiles = parseProfiles(raw);
-      if (!profiles.length) {
-        grid.replaceChildren();
-        grid.hidden = true;
-        empty.hidden = false;
-        empty.querySelector('h2').textContent = 'No profiles found';
-        empty.querySelector('p').textContent = 'Add entries to Profiles.txt using the documented three-line format.';
-        count.textContent = '0 profiles';
-        status.textContent = 'The list loaded, but no complete entries were found.';
-        return;
+  /* Media is fetched only when a card approaches the viewport. */
+  var mediaObserver = ('IntersectionObserver' in window) ? new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      var media = entry.target;
+      if (entry.isIntersecting){
+        if (media.dataset.src && !media.src) media.src = media.dataset.src;
+        if (media.tagName === 'VIDEO'){
+          var promise = media.play();
+          if (promise && promise.catch) promise.catch(function(){});
+        }
+      } else if (media.tagName === 'VIDEO') {
+        media.pause();
       }
-      render();
-      grid.hidden = false;
-    } catch (err) {
-      if (version !== loadVersion) return;
-      console.error('Profile list loading failed:', err);
-      count.textContent = 'Profiles unavailable';
-      status.textContent = 'The list could not be loaded.';
-      error.hidden = false;
+    });
+  }, {rootMargin:'160px 0px', threshold:0.01}) : null;
+
+  function observeLazyVideo(video){
+    if (mediaObserver){
+      mediaObserver.observe(video);
+    } else {
+      video.src = video.dataset.src;
+      var promise = video.play();
+      if (promise && promise.catch) promise.catch(function(){});
     }
   }
 
-  search.addEventListener('input', render);
-  clearButton.addEventListener('click', () => { search.value = ''; render(); search.focus(); });
-  retry.addEventListener('click', loadProfiles);
-  loadProfiles();
+  function buildItem(profile){
+    var li = document.createElement('li');
+    li.className = 'profile-li';
+
+    var a = document.createElement('a');
+    a.className = 'profile-item';
+    if (profile.theme){
+      a.classList.add('theme-' + profile.theme);
+    }
+    a.href = profile.url;
+    a.setAttribute('aria-label', profile.name);
+
+    if (profile.video){
+      a.classList.add('has-bg-video');
+      var bgVideo = document.createElement('video');
+      bgVideo.className = 'card-bg-video';
+      bgVideo.dataset.src = profile.video;
+      bgVideo.preload = 'none';
+      bgVideo.autoplay = true;
+      bgVideo.loop = true;
+      bgVideo.muted = true;
+      bgVideo.defaultMuted = true;
+      bgVideo.playsInline = true;
+      bgVideo.setAttribute('aria-hidden', 'true');
+      a.appendChild(bgVideo);
+      observeLazyVideo(bgVideo);
+    }
+
+    a.appendChild(buildAvatar(profile));
+
+    var textWrap = document.createElement('span');
+    textWrap.className = 'profile-text';
+
+    var name = document.createElement('span');
+    name.className = 'profile-name';
+    name.textContent = profile.name;
+    textWrap.appendChild(name);
+
+    if (profile.role){
+      var role = document.createElement('span');
+      role.className = 'profile-role';
+      role.textContent = profile.role;
+      textWrap.appendChild(role);
+    }
+
+    a.appendChild(textWrap);
+
+    var chevron = document.createElement('span');
+    chevron.className = 'chevron';
+    chevron.setAttribute('aria-hidden', 'true');
+    chevron.textContent = '\u203A';
+    a.appendChild(chevron);
+
+    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches){
+      a.addEventListener('pointermove', function(e){
+        var rect = a.getBoundingClientRect();
+        a.style.setProperty('--mx', ((e.clientX - rect.left) / rect.width * 100) + '%');
+        a.style.setProperty('--my', ((e.clientY - rect.top) / rect.height * 100) + '%');
+      }, {passive:true});
+    }
+
+    a.addEventListener('touchstart', function(){
+      a.classList.add('pressed');
+    }, {passive:true});
+
+    a.addEventListener('touchend', function(){
+      a.classList.remove('pressed');
+    });
+
+    a.addEventListener('touchcancel', function(){
+      a.classList.remove('pressed');
+    });
+
+    li.appendChild(a);
+    return li;
+  }
+
+  function estimateIndex(){
+    var scrollTop = window.scrollY || document.documentElement.scrollTop || 0;
+    var listTop = listEl.getBoundingClientRect().top + scrollTop;
+    var rel = Math.max(0, scrollTop - listTop);
+    return Math.max(0, Math.floor(rel / (ITEM_HEIGHT + ITEM_GAP)));
+  }
+
+  function computeRange(){
+    var total = dataSource.length();
+    var start = Math.max(0, currentIndex - CONFIG.buffer);
+    var end = Math.min(total - 1, currentIndex + CONFIG.buffer);
+    return [start, end];
+  }
+
+  function measureItemHeight(){
+    var li = listEl.querySelector('.profile-li');
+    if (li){
+      var h = li.getBoundingClientRect().height;
+      if (h > 0) ITEM_HEIGHT = h;
+    }
+  }
+
+  /* Parallel to the DOM: renderedEls[k] is the <li> for index (lastRange[0] + k). */
+  var renderedEls = [];
+
+  function cleanupItem(li){
+    var vids = li.querySelectorAll('video');
+    for (var i = 0; i < vids.length; i++){
+      if (mediaObserver) mediaObserver.unobserve(vids[i]);
+      vids[i].pause();
+    }
+  }
+
+  function renderList(force){
+    var total = dataSource.length();
+
+    if (total <= 0){
+      listEl.innerHTML = '';
+      renderedEls = [];
+      lastRange = [-1, -1];
+      listEl.style.paddingTop = '0px';
+      listEl.style.paddingBottom = '0px';
+      return;
+    }
+
+    var range = computeRange();
+    var start = range[0], end = range[1];
+
+    if (!force && start === lastRange[0] && end === lastRange[1]) return;
+
+    var noOverlap = force || lastRange[0] === -1 || start > lastRange[1] || end < lastRange[0];
+
+    if (noOverlap){
+      for (var j = 0; j < renderedEls.length; j++) cleanupItem(renderedEls[j]);
+      listEl.innerHTML = '';
+      renderedEls = [];
+      var frag = document.createDocumentFragment();
+      for (var i = start; i <= end; i++){
+        var li = buildItem(dataSource.get(i));
+        frag.appendChild(li);
+        renderedEls.push(li);
+      }
+      listEl.appendChild(frag);
+    } else {
+      /* Trim items that scrolled out, then grow only the new edge(s). */
+      while (lastRange[0] < start){
+        var trimmedFront = renderedEls.shift();
+        if (trimmedFront){ cleanupItem(trimmedFront); listEl.removeChild(trimmedFront); }
+        lastRange[0]++;
+      }
+      while (lastRange[1] > end){
+        var trimmedBack = renderedEls.pop();
+        if (trimmedBack){ cleanupItem(trimmedBack); listEl.removeChild(trimmedBack); }
+        lastRange[1]--;
+      }
+      for (var fi = lastRange[0] - 1; fi >= start; fi--){
+        var liFront = buildItem(dataSource.get(fi));
+        listEl.insertBefore(liFront, listEl.firstChild);
+        renderedEls.unshift(liFront);
+      }
+      for (var bi = lastRange[1] + 1; bi <= end; bi++){
+        var liBack = buildItem(dataSource.get(bi));
+        listEl.appendChild(liBack);
+        renderedEls.push(liBack);
+      }
+    }
+
+    lastRange = [start, end];
+    listEl.style.paddingTop = (start * (ITEM_HEIGHT + ITEM_GAP)) + 'px';
+    listEl.style.paddingBottom = ((total - end - 1) * (ITEM_HEIGHT + ITEM_GAP)) + 'px';
+    measureItemHeight();
+  }
+
+  var scrollTicking = false;
+
+  window.addEventListener('scroll', function(){
+    if (!scrollTicking){
+      requestAnimationFrame(function(){
+        currentIndex = estimateIndex();
+        renderList(false);
+        scrollTicking = false;
+      });
+      scrollTicking = true;
+    }
+  }, {passive:true});
+
+  window.addEventListener('resize', function(){
+    measureItemHeight();
+  });
+
+  /* =========================================================
+     5. INTRO SEQUENCE
+     ========================================================= */
+  var introEl = document.getElementById('intro');
+  var skipBtn = document.getElementById('skip-btn');
+  var appEl = document.getElementById('app');
+
+  function spawnIntroParticles(){
+    if (reducedMotion) return;
+
+    var container = document.getElementById('intro-particles');
+    var count = 42;
+
+    for (var i = 0; i < count; i++){
+      var p = document.createElement('span');
+      p.className = 'particle';
+      p.style.left = (Math.random() * 100) + '%';
+      p.style.top = (Math.random() * 100) + '%';
+      p.style.animationDelay = (Math.random() * 2.2) + 's';
+      p.style.animationDuration = (2 + Math.random() * 2) + 's';
+      container.appendChild(p);
+    }
+  }
+
+  function finishIntro(){
+    introEl.classList.add('fade-out');
+
+    setTimeout(function(){
+      if (introEl.parentNode) introEl.parentNode.removeChild(introEl);
+      appEl.removeAttribute('aria-hidden');
+      renderList(true);
+    }, 420);
+  }
+
+  function runIntro(){
+    var seen = sessionStorage.getItem('alphaIntroSeen');
+
+    if (seen){
+      if (introEl.parentNode) introEl.parentNode.removeChild(introEl);
+      appEl.removeAttribute('aria-hidden');
+      renderList(true);
+      return;
+    }
+
+    sessionStorage.setItem('alphaIntroSeen', '1');
+
+    mountEmblem(
+      document.getElementById('intro-emblem-wrap')
+    );
+
+    spawnIntroParticles();
+
+    if (reducedMotion){
+      introEl.classList.add('reduced');
+    } else {
+      introEl.classList.add('animating');
+    }
+
+    var duration = reducedMotion ? 700 : 3000;
+
+    var timer = setTimeout(
+      finishIntro,
+      duration
+    );
+
+    skipBtn.addEventListener('click', function(){
+      clearTimeout(timer);
+      finishIntro();
+    }, {once:true});
+  }
+
+  /* =========================================================
+     6. BOOTSTRAP
+     ========================================================= */
+  function init(){
+    runIntro();
+  }
+
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
 })();
